@@ -367,32 +367,3 @@ void UE_UPackage::Process()
         }
     }
 }
-
-bool UE_UPackage::AppendToBuffer(BufferFmt *pBufFmt)
-{
-    if (!pBufFmt)
-        return false;
-
-    if (!Classes.size() && !Structures.size() && !Enums.size())
-        return false;
-
-    pBufFmt->append("// Package: {}\n// Enums: {}\n// Structs: {}\n// Classes: {}\n\n",
-                    GetObject().GetName(), Enums.size(), Structures.size(), Classes.size());
-
-    if (Enums.size())
-    {
-        UE_UPackage::AppendEnumsToBuffer(Enums, pBufFmt);
-    }
-
-    if (Structures.size())
-    {
-        UE_UPackage::AppendStructsToBuffer(Structures, pBufFmt);
-    }
-
-    if (Classes.size())
-    {
-        UE_UPackage::AppendStructsToBuffer(Classes, pBufFmt);
-    }
-
-    return true;
-}
