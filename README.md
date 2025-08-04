@@ -12,7 +12,7 @@ project.
 * Dump UE offsets, classes, structs, enums and functions
 * Generate function names json script to use with IDA & Ghidra etc
 * Symbol and pattern scanning to find GUObjectArray, GNames and NamePoolData addresses automatically
-* Find GEngine and GWorld in '.bss'
+* Find GEngine and GWorld in Data segment
 * Dump UE library from memory
 
 ## Currently Supported Games
