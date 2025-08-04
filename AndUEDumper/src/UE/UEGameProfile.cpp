@@ -205,10 +205,15 @@ std::string IGameProfile::GetNameByID(int32_t id) const
     return GetNameEntryString(GetNameEntry(id));
 }
 
+std::vector<std::string> IGameProfile::GetUESoNames() const
+{
+    return {"libUE4.so",
+            "libUnreal.so"};
+}
+
 ElfScanner IGameProfile::GetUnrealELF() const
 {
-    static const std::vector<std::string> cUELibNames = {"libUE4.so",
-                                                         "libUnreal.so"};
+    static const std::vector<std::string> cUELibNames = GetUESoNames();
 
     static ElfScanner ue_elf{};
     if (ue_elf.isValid())
@@ -221,27 +226,11 @@ ElfScanner IGameProfile::GetUnrealELF() const
             return ue_elf;
     }
 
-    // split config
-    const auto maps = KittyMemoryEx::getAllMaps(kMgr.processID());
-    for (const auto &lib : cUELibNames)
-    {
-        for (auto &it : maps)
-        {
-            if (KittyUtils::String::Contains(it.pathname, kMgr.processName()) &&
-                KittyUtils::String::EndsWith(it.pathname, ".apk"))
-            {
-                ue_elf = kMgr.findMemElfInZip(it.pathname, lib);
-                if (ue_elf.isValid())
-                    return ue_elf;
-            }
-        }
-    }
-
     // last resort, linker solist
     // some games like farlight and pubg remove ELF header from lib
     for (const auto &lib : cUELibNames)
     {
-        ue_elf = kMgr.findMemElfFromLinker(lib);
+        ue_elf = kMgr.findMemElfInLinker(lib);
         if (ue_elf.isValid())
             return ue_elf;
     }

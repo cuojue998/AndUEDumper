@@ -34,6 +34,8 @@ public:
     UEVarsInitStatus InitUEVars();
     const UEVars *GetUEVars() const { return &_UEVars; }
 
+    virtual std::vector<std::string> GetUESoNames() const;
+
     virtual ElfScanner GetUnrealELF() const;
 
     // arch support check
@@ -53,7 +55,7 @@ public:
 
     // Exclude objects from dump, useful when trying to redefine structs/classes in UserTypes.hpp
     virtual std::vector<std::string> GetExcludedObjects() const;
-    
+
     // UserTypes.hpp
     virtual std::string GetUserTypesHeader() const;
 
