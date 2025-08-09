@@ -41,7 +41,7 @@ jobs:
           cp -r build/libs/* ../../output/  # 从项目目录复制到根目录的 output 文件夹
 
       - name: 上传构建结果
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: AndUEDumper-Builds  # 产物包名（含架构区分）
           path: output/  # 上传根目录的 output 文件夹
