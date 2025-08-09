@@ -1,48 +1,44 @@
-name: Build AndUEDumper (Optimized)
-
-# 触发条件：手动触发或推送到 main 分支时
+name: Build AndUEDumper (Fixed)
 on:
-  workflow_dispatch:  # 手动触发（最常用，避免自动构建冗余）
-  push:
-    branches: [ main ]
-    paths:
-      - 'AndUEDumper/**'  # 仅当项目核心目录变更时触发，减少无效构建
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./AndUEDumper  # 统一工作目录，简化命令
+        working-directory: ./AndUEDumper
 
     steps:
-      - name: 拉取代码
-        uses: actions/checkout@v4  # 使用最新版 checkout 动作
+      - name: 拉取代码（含子模块）
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: 安装 Android NDK
+      - name: 安装兼容版本 NDK
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r25c  # 经测试与项目兼容的版本，避免过高版本导致编译错误
+          ndk-version: r21e  # 优先尝试旧版本
 
-      - name: 赋予编译脚本权限
-        run: chmod +x ndk-build.sh  # 确保脚本可执行（项目脚本可能默认无执行权限）
-
-      - name: 执行 NDK 编译
-        run: ./ndk-build.sh  # 调用项目自带脚本，而非直接用 ndk-build，完全复用项目逻辑
-
-      - name: 查看编译产物（调试用）
+      - name: 验证环境
         run: |
-          ls -l build/libs/  # 输出目录结构，方便排查产物是否生成
+          echo "NDK路径: $NDK_HOME"
+          ls -l jni/  # 检查配置文件是否存在
 
-      - name: 打包所有架构产物
+      - name: 强制赋予脚本权限
+        run: chmod 777 ndk-build.sh
+
+      - name: 执行编译（带详细日志）
+        run: ./ndk-build.sh V=1  # V=1 输出详细编译日志，方便排查
+
+      - name: 打包产物
+        if: success()  # 仅成功时执行
         run: |
-          # 创建输出目录并复制所有架构的可执行文件
           mkdir -p ../../output
-          cp -r build/libs/* ../../output/  # 从项目目录复制到根目录的 output 文件夹
+          cp -r build/libs/* ../../output/
 
-      - name: 上传构建结果
-        uses: actions/upload-artifact@v4
+      - name: 上传产物
+        if: success()
+        uses: actions/upload-artifact@v3
         with:
-          name: AndUEDumper-Builds  # 产物包名（含架构区分）
-          path: output/  # 上传根目录的 output 文件夹
-          retention-days: 7  # 产物保留 7 天，节省空间
+          name: AndUEDumper-Builds
+          path: output/
